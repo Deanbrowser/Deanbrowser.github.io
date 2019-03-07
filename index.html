@@ -79,24 +79,28 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2019/03/07/index/" title itemprop="url"></a>
+      <a href="/2019/03/06/hello-world/" title="Hello World" itemprop="url">Hello World</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="Thai wx" target="_blank" itemprop="author">Thai wx</a>
 		
   </p><p class="article-time">
-    <time datetime="2019-03-07T02:42:35.127Z" itemprop="datePublished"> Published 2019-03-07</time>
+    <time datetime="2019-03-06T15:02:24.402Z" itemprop="datePublished"> Published 2019-03-06</time>
     
   </p>
 </header>
     <div class="article-content">
         
-        <ol>
-<li><a href="FZF.md">FZF：一个命令行查找工具</a></li>
-<li><a href="MRI中的inline缓存[翻译]">MRI中的inline缓存[翻译]</a></li>
-<li><a href="只有6行的Sinatra 源码解读">只有6行的Sinatra 源码解读</a></li>
-</ol>
+        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
 
         
         
@@ -133,113 +137,14 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2019/03/07/只有6行的Sinatra 源码解读/" title itemprop="url"></a>
+      <a href="/2018/01/06/javascript算法/" title="javascript 数据结构与算法" itemprop="url">javascript 数据结构与算法</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="Thai wx" target="_blank" itemprop="author">Thai wx</a>
 		
   </p><p class="article-time">
-    <time datetime="2019-03-07T02:42:35.127Z" itemprop="datePublished"> Published 2019-03-07</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <p><a href="https://github.com/sinatra/sinatra" target="_blank" rel="noopener">Sinatra</a>是一个极简的Web框架，目前代码仅仅17000行，相比而言，<code>rails</code> 5.1光Ruby代码就超过了220000，完全是就是庞然大物。对于初学者我来说，17000行代码要是真的读完，还是比较虚。正好，Sinatra的主要作者之一，<a href="https://github.com/rkh" target="_blank" rel="noopener">rkh</a>重写了<code>Sinatra</code>，并实现了<code>Sinatra</code>的核心逻辑<a href="https://github.com/rkh/almost-sinatra" target="_blank" rel="noopener">almost-sinatra</a>，仅仅用了6行代码，你没看错，<strong>真的只有6行</strong>。这6行里面，作者在<code>Rack</code>里面动了很多手脚，用了很多元编程的技巧，值得学习。</p>
-<p>当然，为了压缩代码，作者做了很多丧心病狂的事情，比如给变量命超短的名字，比如不停的用<code>;</code>来避免换行-_-，但是没关系，我已经把它重重构好加上注释了。原代码如下，重构后的代码我放在<a href="https://github.com/ceclinux/almost_sinatra_refactored" target="_blank" rel="noopener">这里</a></p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">%w.rack tilt backports date INT TERM..map&#123;<span class="params">|l|</span>trap(l)&#123;$r.stop&#125;<span class="keyword">rescue</span> <span class="keyword">require</span> l&#125;;$u=Date;$z=($u.new.year + <span class="number">145</span>).abs;puts <span class="string">"== Almost Sinatra/No Version has taken the stage on #$z for development with backup from Webrick"</span></span><br><span class="line">$n=Sinatra=Module.new&#123;extend Rack;a,D,S,q=Rack::Builder.new,Object.method(<span class="symbol">:define_method</span>),<span class="regexp">/@@ *([^\n]+)\n(((?!@@)[^\n]*\n)*)/m</span></span><br><span class="line"><span class="string">%w[get post put delete]</span>.map&#123;<span class="params">|m|</span>D.(m)&#123;<span class="params">|u,&amp;b|</span>a.map(u)&#123;run-&gt;(e)&#123;[<span class="number">200</span>,&#123;<span class="string">"Content-Type"</span>=&gt;<span class="string">"text/html"</span>&#125;,[a.instance_eval(&amp;b)]]&#125;&#125;&#125;&#125;</span><br><span class="line">Tilt.default_mapping.lazy_map.map&#123;<span class="params">|k,v|</span>D.(k)&#123;<span class="params">|n,*o|</span>$t<span class="params">||</span>=(h=$u._jisx0301(<span class="string">"hash, please"</span>);File.read(caller[<span class="number">0</span>][<span class="regexp">/^[^:]+/</span>]).scan(S)&#123;<span class="params">|a,b|</span>h[a]=b&#125;;h);Kernel.const_get(v[<span class="number">0</span>][<span class="number">0</span>]).new(*o)&#123;n==<span class="string">"<span class="subst">#&#123;n&#125;</span>"</span><span class="string">?n</span><span class="symbol">:</span>$t[n.to_s]&#125;.render(a,o[<span class="number">0</span>].try(<span class="symbol">:[]</span>,<span class="symbol">:locals</span>)<span class="params">||</span>&#123;&#125;)&#125;&#125;</span><br><span class="line"><span class="string">%w[set enable disable configure helpers use register]</span>.map&#123;<span class="params">|m|</span>D.(m)&#123;<span class="params">|*_,&amp;b|</span>b.try <span class="symbol">:[]</span>&#125;&#125;;<span class="keyword">END</span>&#123;Rack::Handler.get(<span class="string">"webrick"</span>).run(a,<span class="symbol">Port:</span>$z)&#123;<span class="params">|s|</span>$r=s&#125;&#125;</span><br><span class="line"><span class="string">%w[params session]</span>.map&#123;<span class="params">|m|</span>D.(m)&#123;q.send m&#125;&#125;;a.use Rack::Session::Cookie;a.use Rack::Lock;D.(<span class="symbol">:before</span>)&#123;<span class="params">|&amp;b|</span>a.use Rack::Config,&amp;b&#125;;before&#123;<span class="params">|e|</span>q=Rack::Request.new e;q.params.dup.map&#123;<span class="params">|k,v|</span>params[k.to_sym]=v&#125;&#125;&#125;</span><br></pre></td></tr></table></figure>
-<p>好的，虽然重构了一下，这些代码的信息量依然巨大，我们一段一段的来看</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">%w.rack tilt backports date INT TERM..map <span class="keyword">do</span> <span class="params">|l|</span></span><br><span class="line">    trap(l)&#123;$r.stop&#125;<span class="keyword">rescue</span> <span class="keyword">require</span> l</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
-<p>一开始作者就拼命的想要省代码数，这里作者做了两件事情</p>
-<ul>
-<li>引入<code>rack tilt backports date</code>等库 </li>
-<li>当程序接收到<code>TERM</code>或者<code>INT</code>时，调用<code>$r.stop</code></li>
-</ul>
-<p>那它们是怎么被区分开来的呢？你可以把<code>rescue require l</code>去掉，运行后就会报错</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">almost_sinatra.rb:3:in `trap&apos;: unsupported signal SIGrack (ArgumentError</span><br></pre></td></tr></table></figure>
-<p>所以报错的，都被<code>require</code>了</p>
-<p>至于<code>$r</code>是什么东西？，后面会提到。</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$curr_date=Date</span><br><span class="line">$port_num=($curr_date.new.year + <span class="number">145</span>).abs</span><br><span class="line">puts <span class="string">"== Almost Sinatra/No Version has taken the stage on #$port_num for development with backup from Webrick"</span></span><br></pre></td></tr></table></figure>
-<p>这三行非常简单，它打印了一行说明，并设置端口号为当前年 + 145</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$n=Sinatra=Module.new&#123;</span><br><span class="line">    extend Rack</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>继续向下看，有一个很大的代码块。这里新建了一个匿名Module并赋值给了<code>Sinatra</code>和<code>$n</code>，在这个Module中，这里<code>extend Rack</code>即继承Rack中所有的方法到当前对象中，由于当前对象<code>self</code>就是这个Module，所有相当于继承了所有Rack的实例方法到当前所建立的Module的类方法中，<strong>然并软</strong>，<code>Rack</code>模块偏偏没有实例方法，所有去掉这一行也能运行。</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">rack_builder = Rack::Builder.new</span><br><span class="line">method_obj = Object.method(<span class="symbol">:define_method</span>)</span><br><span class="line">template_regex = <span class="regexp">/@@ *([^\n]+)\n(((?!@@)[^\n]*\n)*)/m</span></span><br><span class="line">rack_request = <span class="literal">nil</span></span><br></pre></td></tr></table></figure>
-<p>这里面新建了四个变量，第一个<code>Rack::Builder.new</code>，是一个方便构建<code>rack</code>应用的工具，比如说这样，<br><figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">require</span> <span class="string">'rack/lobster'</span></span><br><span class="line">app = Rack::Builder.new <span class="keyword">do</span></span><br><span class="line">    use Rack::CommonLogger</span><br><span class="line">    use Rack::ShowExceptions</span><br><span class="line">    map <span class="string">"/lobster"</span> <span class="keyword">do</span></span><br><span class="line">      use Rack::Lint</span><br><span class="line">      run Rack::Lobster.new</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  run app</span><br></pre></td></tr></table></figure></p>
-<p>像写DSL一样！至于<code>Object.method(:define_method)</code>，是一个<code>Method</code>对象表示的方法，可以在以后使用<code>Method#call</code>方法对它进行调用（这里为了省代码，省略写成<code>.()</code>），也就是是说，我们把<code>define_method</code>这个方法拉出来了（后面我们会反复用到它）。<code>rack_request</code>暂定为空，<code>template_regex</code>这个多行<code>regex</code>接下来也会谈到。</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">%w[get post put delete]</span>.map <span class="keyword">do</span> <span class="params">|m|</span></span><br><span class="line">       method_obj.(m) <span class="keyword">do</span> <span class="params">|u,&amp;b|</span></span><br><span class="line">           rack_builder.map(u)&#123;             </span><br><span class="line">               run lambda &#123; <span class="params">|env|</span></span><br><span class="line">                   [</span><br><span class="line">                       <span class="number">200</span>,</span><br><span class="line">                       &#123;<span class="string">"Content-Type"</span>=&gt;<span class="string">"text/html"</span>&#125;,</span><br><span class="line">                       <span class="comment">#instance_eval在一个对象的向下文中执行块</span></span><br><span class="line">                       [rack_builder.instance_eval(&amp;b)]</span><br><span class="line">                   ]</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       <span class="keyword">end</span></span><br><span class="line">   <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
-<p>好，我们开始使用<code>method_obj</code>(<code>Object.method(:define_method)</code>),它的使用姿势是<code>Method#call</code>，可以简写成<code>.()</code>，这里<code>method_obj.(m)</code>相当于构建了四个方法，分别是<code>get post put delete</code>，在每个方法中，我利用它传进来的参数和<code>Rack::Builder#map</code>方法建立路由，比如说，<code>get</code>方法就是</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get</span><span class="params">(u, &amp;b)</span></span></span><br><span class="line">    map u <span class="keyword">do</span></span><br><span class="line">        run lambda &#123; <span class="params">|env|</span></span><br><span class="line">                    [</span><br><span class="line">                        <span class="number">200</span>,</span><br><span class="line">                        &#123;<span class="string">"Content-Type"</span>=&gt;<span class="string">"text/html"</span>&#125;,</span><br><span class="line">                        <span class="comment">#instance_eval在一个对象的向下文中执行块</span></span><br><span class="line">                        [rack_builder.instance_eval(&amp;b)]</span><br><span class="line">                    ]</span><br><span class="line">                &#125;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
-<p>看看前面<code>Rack::Builder</code>的介绍，是不是很熟悉？至于为何写成了这样，你就需要懂<code>rack</code>，具体<code>rack</code>介绍你可以看<a href="https://ruby-china.org/topics/31592" target="_blank" rel="noopener">这里</a>也可以看源代码。</p>
-<p>继续往下看</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Tilt.default_mapping.lazy_map.map <span class="keyword">do</span> <span class="params">|k,v|</span></span><br><span class="line">       method_obj.(k)&#123;</span><br><span class="line">           <span class="params">|n,*o|</span> </span><br><span class="line"></span><br><span class="line">           $t<span class="params">||</span>=(</span><br><span class="line">               <span class="comment"># https://ruby-doc.org/stdlib-2.3.1/libdoc/date/rdoc/Date.html#method-c-_jisx0301</span></span><br><span class="line">               <span class="comment"># Returns a hash of parsed elements.</span></span><br><span class="line">               h=$curr_date._jisx0301(<span class="string">"hash, please"</span>)</span><br><span class="line">               File.read(caller[<span class="number">0</span>][<span class="regexp">/^[^:]+/</span>]).scan(template_regex)&#123;<span class="params">|a,b|</span>h[a]=b&#125;</span><br><span class="line">               h</span><br><span class="line">           )</span><br><span class="line">           <span class="comment"># n=="#&#123;n&#125;" to test n is a string</span></span><br><span class="line">           Kernel.const_get(v[<span class="number">0</span>][<span class="number">0</span>]).new(*o)&#123;n==<span class="string">"<span class="subst">#&#123;n&#125;</span>"</span><span class="string">?n</span><span class="symbol">:</span>$t[n.to_s]&#125;</span><br><span class="line">           .render(rack_builder,o[<span class="number">0</span>]</span><br><span class="line">           .try(<span class="symbol">:[]</span>,<span class="symbol">:locals</span>)<span class="params">||</span>&#123;&#125;)</span><br><span class="line">       &#125;</span><br><span class="line">   <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
-<p>这里用到了一个叫<code>Tilt</code>库，<code>Tilt</code>帮你绑定了不同的模版引擎并封装好，以让人以统一的方式使用它。 简单说，这个方法遍历了所有的<code>Tilt.default_mapping.lazy_map</code>，它的每个<code>v</code>长成这样，</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[[[&quot;Tilt::ErubiTemplate&quot;, &quot;tilt/erubi&quot;],</span><br><span class="line"> [&quot;Tilt::ErubisTemplate&quot;, &quot;tilt/erubis&quot;],</span><br><span class="line"> [&quot;Tilt::ERBTemplate&quot;, &quot;tilt/erb&quot;]],</span><br><span class="line">[[&quot;Tilt::ErubiTemplate&quot;, &quot;tilt/erubi&quot;],</span><br><span class="line"> [&quot;Tilt::ErubisTemplate&quot;, &quot;tilt/erubis&quot;],</span><br><span class="line"> [&quot;Tilt::ERBTemplate&quot;, &quot;tilt/erb&quot;]],</span><br><span class="line">[[&quot;Tilt::ErubisTemplate&quot;, &quot;tilt/erubis&quot;]],</span><br><span class="line">[[&quot;Tilt::ErubiTemplate&quot;, &quot;tilt/erubi&quot;]],</span><br><span class="line">[[&quot;Tilt::PandocTemplate&quot;, &quot;tilt/pandoc&quot;],</span><br></pre></td></tr></table></figure>
-<p>他把所有模版引擎的名字作为定义的函数的名字，比如说<code>haml</code>。在这个函数里面，他先读取了我们写的模版文件，把其中的信息保存给了<code>t</code>（对，这个时候<code>template_regex</code>起了作用，他把整个文件切成了<code>String</code>数组），总之，如果存在这样一个模板文件，</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">@@ index</span><br><span class="line">%html</span><br><span class="line">  %head</span><br><span class="line">    %title= @title</span><br><span class="line">  %body</span><br><span class="line">    %a&#123;:href =&gt; &apos;/hello?name=World&apos;&#125; Say hello!</span><br><span class="line">    %a&#123;:href =&gt; &apos;/counter&apos;&#125; Show Counter</span><br><span class="line"></span><br><span class="line">@@ hello</span><br><span class="line">Hello &lt;%= name %&gt;!</span><br></pre></td></tr></table></figure>
-<p>最后<code>$t</code>变成了一个哈希，长成了这样，所以当你调用<code>haml :index</code>的时候，实际上<code>:index</code>作为键值帮你找到了相应的模板<code>$t[n.to_s]</code>，然后就被渲染出来啦。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;index&quot;=&gt;</span><br><span class="line">  &quot;%html\n  %head\n    %title= @title\n  %body\n    %a&#123;:href =&gt; &apos;/hello?name=World&apos;&#125; Say hello!\n    %a&#123;:href =&gt; &apos;/counter&apos;&#125; Show Counter\n\n&quot;,</span><br><span class="line"> &quot;hello&quot;=&gt;&quot;Hello &lt;%= name %&gt;!\n&quot;&#125;</span><br></pre></td></tr></table></figure>
-<p>然后使用<code>Kernel.const_get(v[0][0])</code>（对于<code>haml</code>实际上就是<code>Tilt::HamlTemplate</code>），然后<code>render</code>他，你当然可以传在<code>render</code>的时候传进<code>locals</code>变量（利用<code>try(:[],:locals)||{})</code>都把它引进来了）。</p>
-<p>你会觉得很奇怪，<code>try</code>是哪里来的，这又不是<code>rails</code>? 其实，这是<code>backports</code>从<code>rails</code>里面偷来的<a href="https://github.com/marcandre/backports/blob/5c876824f52ace6733ee00ae188f4a7e0a12ef32/lib/backports/rails/kernel.rb" target="_blank" rel="noopener">https://github.com/marcandre/backports/blob/5c876824f52ace6733ee00ae188f4a7e0a12ef32/lib/backports/rails/kernel.rb</a>。</p>
-<p>你依然会觉得奇怪，<code>h=$curr_date._jisx0301(&quot;hash, please&quot;)</code>是什么意思？其实这是作者的恶趣味= =|，<code>Date._jisx0301</code>只有传入符合格式的数组才会返回一个非空哈希，像这样</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Date._jisx0301(<span class="string">"H13.02.03"</span>) <span class="comment"># Date._jisx0301("H13.02.03")</span></span><br></pre></td></tr></table></figure>
-<p>不然就是一个空哈希而已</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">%w[set enable disable configure helpers use register]</span>.each <span class="keyword">do</span> <span class="params">|m|</span></span><br><span class="line">        method_obj.(m) <span class="keyword">do</span> <span class="params">|*_,&amp;b|</span> </span><br><span class="line">            b.try <span class="symbol">:[]</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
-<p>读到这里，你又发现作者开了个玩笑，他定义了一堆方法，然后当调用这方法时，只是运行方法传入的block而已，也就是说，<br><code>enable :session</code>和<code>disable :session</code>其实都一样……</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">END</span>&#123;Rack::Handler.get(<span class="string">"webrick"</span>).run(rack_builder,<span class="symbol">Port:</span>$port_num)&#123;<span class="params">|s|</span>$r=s&#125;&#125;</span><br></pre></td></tr></table></figure>
-<p><code>END</code>表示该代码块总是最后运行，这里调用了<code>Rack::Handler::WEBrick#run</code>方法，并传入了代码块，然后把<code>WEBrick</code>服务器赋值给前面提到的<code>$r</code>，这样，<code>$r.stop</code>就可以关闭服务器啦。</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">@server = <span class="symbol">:</span><span class="symbol">:WEBrick</span><span class="symbol">:</span><span class="symbol">:HTTPServer</span>.new(options)</span><br><span class="line"><span class="keyword">yield</span> @server  <span class="keyword">if</span> block_given?</span><br><span class="line">@server.start</span><br></pre></td></tr></table></figure>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">%w[params session]</span>.map&#123;<span class="params">|m|</span>method_obj.(m)&#123;rack_request.send m&#125;&#125;;</span><br></pre></td></tr></table></figure>
-<p>这一行，所有<code>params</code>和<code>session</code>的调用都被<strong>转发给了</strong><code>Rack::Request#params</code>和<code>Rack::Request#session</code></p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rack_builder.use Rack::Session::Cookie</span><br><span class="line">rack_builder.use Rack::Lock</span><br></pre></td></tr></table></figure>
-<p>这里<code>rack_builder</code>使用了两个中间件，其中<code>Rack::Lock</code>使用<code>mutex</code>控制了每个请求，保证了每个请求是<strong>同步的</strong>。而<code>Rack::Session::Cookie</code>保证服务器客户端上简单的<code>cookie-session</code>控制。</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">method_obj.(<span class="symbol">:before</span>)&#123;<span class="params">|&amp;b|</span>rack_builder.use Rack::Config,&amp;b&#125;</span><br><span class="line">before <span class="keyword">do</span> <span class="params">|e|</span></span><br><span class="line">    rack_request=Rack::Request.new e</span><br><span class="line">    rack_request.params.dup.map&#123;<span class="params">|k,v|</span>params[k.to_sym]=v&#125;</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
-<p>最后这几行代码中，先是定义了<code>before</code>方法，并把传入的块当作了<code>rack_builder.use</code>的参数。然后调用了<code>before</code>，将<code>rack_request</code>中<code>params</code>的<code>key</code>都转化成<code>symbol</code>。至于<code>rack_builder.use</code>和<code>Rack::Config</code>是什么鬼，代码都很简单，看一眼便知<br><figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">use</span><span class="params">(middleware, *args, &amp;block)</span></span></span><br><span class="line">    <span class="keyword">if</span> @map</span><br><span class="line">      mapping, @map = @map, <span class="literal">nil</span></span><br><span class="line">      @use &lt;&lt; proc &#123; <span class="params">|app|</span> generate_map app, mapping &#125;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    @use &lt;&lt; proc &#123; <span class="params">|app|</span> middleware.new(app, *args, &amp;block) &#125;</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">class</span> <span class="title">Config</span></span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(app, &amp;block)</span></span></span><br><span class="line">    @app = app</span><br><span class="line">    @block = block</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(env)</span></span></span><br><span class="line">    @block.call(env)</span><br><span class="line">    @app.call(env)</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure></p>
-<p>你现在看看<code>Sinatra</code>应用的例子<a href="https://github.com/rkh/almost-sinatra/blob/master/example.rb" target="_blank" rel="noopener">https://github.com/rkh/almost-sinatra/blob/master/example.rb</a>，是不是像开启写轮眼一样，里面的封装黑盒已经一清二楚了呢？^_^</p>
-
-        
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2019/03/07/MRI中的inline缓存[翻译]/" title itemprop="url"></a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Thai wx" target="_blank" itemprop="author">Thai wx</a>
-		
-  </p><p class="article-time">
-    <time datetime="2019-03-07T02:42:35.111Z" itemprop="datePublished"> Published 2019-03-07</time>
+    <time datetime="2018-01-06T15:06:20.000Z" itemprop="datePublished"> Published 2018-01-06</time>
     
   </p>
 </header>
@@ -303,192 +208,16 @@
     <footer class="article-footer clearfix">
 <div class="article-catetags">
 
-
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/frontEnd/">frontEnd</a>
 </div>
 
 
-
-
-<div class="comments-count">
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2019/03/07/FZF/" title itemprop="url"></a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Thai wx" target="_blank" itemprop="author">Thai wx</a>
-		
-  </p><p class="article-time">
-    <time datetime="2019-03-07T02:42:35.096Z" itemprop="datePublished"> Published 2019-03-07</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <p>古人云</p>
-<blockquote>
-<p>All problems in computer science can be solved by another level of indirection</p>
-</blockquote>
-<p>所以从某种角度上，文件系统也就是给底层硬盘之类的IO设备加了一层抽象（indirection）。来一段维基</p>
-<blockquote>
-<p>计算机的文件系统是一种存储和组织计算机数据的方法，它使得对其访问和查找变得容易，文件系统使用文件和<strong>树形目录</strong>的抽象逻辑概念代替了硬盘和光盘等物理设备使用数据块的概念，用户使用文件系统来保存数据不必关心数据实际保存在硬盘（或者光盘）的地址为多少的数据块上，只需要记住这个文件的所属目录和文件名。在写入新数据之前，用户不必关心硬盘上的那个块地址没有被使用，硬盘上的存储空间管理（分配和释放）功能由文件系统自动完成，用户只需要记住数据被写入到了哪个文件中。</p>
-</blockquote>
-<p>用操作系统久了之后，很多人逐渐发现，基于树状的文件系统抽象似乎不是那么直观。比如我在写faq相关的时候，大多数在脑子第一想到的是我要编辑controller的名字<code>faqs_controller.rb</code>，然后想到到他的路径<code>uniqueway/cure/app/controllers/admin/faqs_controller.rb</code>。我们大脑里面关心的是文件的名字和用途，而往往不在乎他的路径</p>
-<p>所以如何替代掉树状，增加我们访问文件的效率呢？我们不可能发明一个轮子，做一个不基于树形目录的文件系统（树状目录也绝非一无是处）。怎么办？常见有两个思路</p>
-<h2 id="Cache"><a href="#Cache" class="headerlink" title="Cache"></a>Cache</h2><p>再来搬一段维基（顺便复习下基本概念 = =）</p>
-<blockquote>
-<p>高速缓存文件置换机制</p>
-</blockquote>
-<blockquote>
-<p>高速缓存文件置换机制是电脑处理缓存内存的一种机制。<br>电脑内存空间的大小固定，无法容纳服务器上所有的文件，所以当有新的文件要被置换入缓存时，必须根据一定的原则来取代掉适当的文件。此原则即所谓高速缓存文件置换机制。<br>缓存文件置换方法有：</p>
-<p>先进先出算法（FIFO）：最先进入的内容作为替换对象<br>最近最少使用算法（LFU）：最近最少使用的内容作为替换对象<br>最久未使用算法（LRU）：最久没有访问的内容作为替换对象<br>非最近使用算法（NMRU）：在最近没有使用的内容中随机选择一个作为替换对象<br>Belady’s Min</p>
-</blockquote>
-<p>正常我们再访问文件的时候，都是在文件系统这个树状的数据结构下进行自顶向下访问的。Cache的思想就是我们建立一个缓存区，来储存我们（经常访问 || 很可能下次访问 || 访问最多次 || …)的文件和路径。 这样我们下次访问文件的时候， 不用再在树上的节点上慢慢爬拉，先看看缓存区在不在就好了。</p>
-<p>这种思想已经有各种各样的实现，各类编辑器菜单里面都有（最近访问的文件），shell中你可以用<a href="https://github.com/rupa/z" target="_blank" rel="noopener">z</a>来根据频次跳转。当然<strong>宇宙第一编辑器Vim</strong>肯定也有的实现，神马你不知道，赶紧打开Vim，输入<code>h :mru</code>和<code>h :oldfiles</code>并朗诵一遍。</p>
-<h2 id="匹配检索"><a href="#匹配检索" class="headerlink" title="匹配检索"></a>匹配检索</h2><p>有人发现，树状目录下我们当前只能访问查看一个节点，如果错了还要退回来。试想如果能事先看到所有的节点，然后就不是可以直接找到文件了？当然可以！<code>ls -R</code>(-R ecursively list subdirectories encountered.)。文件太多，一个个看不过来怎么办？我们可以做一些匹配检索，过滤筛选掉一些。比如可以根据（文件名，文件内容，文件目录……）的特征运用一些匹配算法（史密斯-沃特曼算法 || 内德曼-文施算法 || … ），然后直接从筛选的文件队列中找就行了。</p>
-<p>这样做的好处相比于Cache方法，那些很少访问的文件也会很容易找到。所以对于最近编辑的文件，使用Cache类型工具会很方便，对于所有文件，使用匹配检索更好。当然结合起来用起来就更爽拉。大家很熟悉的<code>Ctrl-p</code>就是这样一个工具，那命令行有没有这样一个东西呢？当然就，就是<strong>FZF</strong>（终于拉回正题～）</p>
-<h2 id="FZF"><a href="#FZF" class="headerlink" title="FZF"></a>FZF</h2><p>一图胜千言</p>
-<p><img src="https://raw.githubusercontent.com/junegunn/i/master/fzf-preview.png" alt></p>
-<p>他的好处可多了，结合<strong>宇宙第一编辑器Vim</strong>可以这样</p>
-<p><code>vim -p $(fzf -m) //p: open N tab pages in vim, m: fzf multiple select</code></p>
-<p>可以多选文件，并把他们每个都新开一个<code>tab</code></p>
-<p>说好的结合使用Cache和匹配检索呢？和<a href="https://github.com/rupa/z" target="_blank" rel="noopener">z</a>结合一下就好了</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">unalias z</span><br><span class="line">z() &#123;</span><br><span class="line">  if [[ -z &quot;$*&quot; ]]; then</span><br><span class="line">    cd &quot;$(_z -l 2&gt;&amp;1 | fzf +s --tac | sed &apos;s/^[0-9,.]* *//&apos;)&quot;</span><br><span class="line">  else</span><br><span class="line">    _last_z_args=&quot;$@&quot;</span><br><span class="line">    _z &quot;$@&quot;</span><br><span class="line">  fi</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">zz() &#123;</span><br><span class="line">  cd &quot;$(_z -l 2&gt;&amp;1 | sed &apos;s/^[0-9,.]* *//&apos; | fzf -q &quot;$_last_z_args&quot;)&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>命令好的好处就是能把各种小工具连在一起，<a href="https://github.com/junegunn/fzf/wiki/examples#integration-with-z" target="_blank" rel="noopener">这里</a>介绍了很多玩法，觉得好的扔进你的<code>.zshrc</code>吧</p>
-
-        
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2019/03/06/test-my-site/" title="test_my_site" itemprop="url">test_my_site</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Thai wx" target="_blank" itemprop="author">Thai wx</a>
-		
-  </p><p class="article-time">
-    <time datetime="2019-03-06T15:06:20.000Z" itemprop="datePublished"> Published 2019-03-06</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        
-        
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2019/03/06/hello-world/" title="Hello World" itemprop="url">Hello World</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Thai wx" target="_blank" itemprop="author">Thai wx</a>
-		
-  </p><p class="article-time">
-    <time datetime="2019-03-06T15:02:24.402Z" itemprop="datePublished"> Published 2019-03-06</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
-        
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/javascript/">javascript</a>
+  </div>
 
 </div>
 
@@ -521,8 +250,30 @@
 
 
   
+<div class="categorieslist">
+	<p class="asidetitle">Categories</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/frontEnd/" title="frontEnd">frontEnd<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
 
   
+<div class="tagslist">
+	<p class="asidetitle">Tags</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/javascript/" title="javascript">javascript<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
 
   <div class="linkslist">
   <p class="asidetitle">Links</p>
