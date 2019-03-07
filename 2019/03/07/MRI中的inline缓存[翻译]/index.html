@@ -1,0 +1,494 @@
+
+ <!DOCTYPE HTML>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+  
+    <title>Hexo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="John Doe">
+    
+
+    
+    <meta name="description" content="本文是由Inline caching in MRI 翻译而来，作者@tenderlove，他是ruby的代码贡献者之一，我已得到他本人的口头授权。  MRI中的inline缓存每一次你调用函数，Ruby会试图找到那个函数，然后再调用它。这个过程可能对性能耗费巨大。所以那些写虚拟机的程序员就会想方设法把函数查找这个过程缓存起来，以便于加快查找速度。MRI（其它大多数Ruby虚拟机也一样）使用的是i">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://yoursite.com/2019/03/07/MRI中的inline缓存[翻译]/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本文是由Inline caching in MRI 翻译而来，作者@tenderlove，他是ruby的代码贡献者之一，我已得到他本人的口头授权。  MRI中的inline缓存每一次你调用函数，Ruby会试图找到那个函数，然后再调用它。这个过程可能对性能耗费巨大。所以那些写虚拟机的程序员就会想方设法把函数查找这个过程缓存起来，以便于加快查找速度。MRI（其它大多数Ruby虚拟机也一样）使用的是i">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2017-11-22T15:04:33.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hexo">
+<meta name="twitter:description" content="本文是由Inline caching in MRI 翻译而来，作者@tenderlove，他是ruby的代码贡献者之一，我已得到他本人的口头授权。  MRI中的inline缓存每一次你调用函数，Ruby会试图找到那个函数，然后再调用它。这个过程可能对性能耗费巨大。所以那些写虚拟机的程序员就会想方设法把函数查找这个过程缓存起来，以便于加快查找速度。MRI（其它大多数Ruby虚拟机也一样）使用的是i">
+
+    
+    <link rel="alternative" href="/atom.xml" title="Hexo" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="Hexo" title="Hexo"></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="Hexo">Hexo</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search">
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</ul></nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2019/03/07/MRI中的inline缓存[翻译]/" title itemprop="url"></a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="John Doe" target="_blank" itemprop="author">John Doe</a>
+		
+  </p><p class="article-time">
+    <time datetime="2019-03-07T02:42:35.111Z" itemprop="datePublished"> Published 2019-03-07</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">Contents</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#MRI中的inline缓存"><span class="toc-number">1.</span> <span class="toc-text">MRI中的inline缓存</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#什么是inline缓存"><span class="toc-number">1.1.</span> <span class="toc-text">什么是inline缓存</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#所以，inline缓存的键和值是什么？"><span class="toc-number">1.2.</span> <span class="toc-text">所以，inline缓存的键和值是什么？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#全局函数状态"><span class="toc-number">1.2.1.</span> <span class="toc-text">全局函数状态</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#类序列号-class-serial"><span class="toc-number">2.</span> <span class="toc-text">类序列号(class_serial)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#复习"><span class="toc-number">2.1.</span> <span class="toc-text">复习</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#函数调用的类型与缓存"><span class="toc-number">2.2.</span> <span class="toc-text">函数调用的类型与缓存</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#复习-1"><span class="toc-number">3.</span> <span class="toc-text">复习</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#检查缓存命中情况"><span class="toc-number">4.</span> <span class="toc-text">检查缓存命中情况</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">4.1.</span> <span class="toc-text">参考资料</span></a></li></ol></li></ol>
+		
+		</div>
+		
+		<blockquote>
+<p>本文是由<a href="http://tenderlovemaking.com/2015/12/23/inline-caching-in-mri.html" target="_blank" rel="noopener">Inline caching in MRI</a> 翻译而来，作者<a href="https://twitter.com/tenderlove" target="_blank" rel="noopener">@tenderlove</a>，他是<a href="https://github.com/ruby/ruby/graphs/contributors" target="_blank" rel="noopener">ruby的代码贡献者之一</a>，我已得到他本人的口头授权。</p>
+</blockquote>
+<h1 id="MRI中的inline缓存"><a href="#MRI中的inline缓存" class="headerlink" title="MRI中的inline缓存"></a>MRI中的inline缓存</h1><p>每一次你调用函数，Ruby会试图找到那个函数，然后再调用它。这个过程可能对性能耗费巨大。所以那些写虚拟机的程序员就会想方设法把函数查找这个过程缓存起来，以便于加快查找速度。MRI（其它大多数Ruby虚拟机也一样）使用的是inline缓存。我们都知道什么是缓存，那么inline缓存是什么鬼？</p>
+<h2 id="什么是inline缓存"><a href="#什么是inline缓存" class="headerlink" title="什么是inline缓存"></a>什么是inline缓存</h2><p>Inline缓存是伴随Ruby字节码产生的“行内”缓存。比如以下程序。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">foo</span> <span class="title">bar</span>, <span class="title">baz</span></span></span><br><span class="line">  bar.baz</span><br><span class="line">  baz.baz</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">ins = RubyVM::InstructionSequence.of method(<span class="symbol">:foo</span>)</span><br><span class="line">puts ins.disasm</span><br></pre></td></tr></table></figure>
+<p>如何你运行以上程序，你会看到和下面差不多的内容</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">$ ruby x.rb </span><br><span class="line">== disasm: #&lt;ISeq:foo@x.rb&gt;=============================================</span><br><span class="line">local table (size: 3, argc: 2 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1, kwrest: -1])</span><br><span class="line">[ 3] bar&lt;Arg&gt;   [ 2] baz&lt;Arg&gt;   </span><br><span class="line">0000 trace            8                                               (   1)</span><br><span class="line">0002 trace            1                                               (   2)</span><br><span class="line">0004 getlocal_OP__WC__0 3</span><br><span class="line">0006 opt_send_without_block &lt;callinfo!mid:baz, argc:0, ARGS_SIMPLE&gt;, &lt;callcache&gt;</span><br><span class="line">0009 pop              </span><br><span class="line">0010 trace            1                                               (   3)</span><br><span class="line">0012 getlocal_OP__WC__0 2</span><br><span class="line">0014 opt_send_without_block &lt;callinfo!mid:baz, argc:0, ARGS_SIMPLE&gt;, &lt;callcache&gt;</span><br><span class="line">0017 trace            16                                              (   4)</span><br><span class="line">0019 leave</span><br></pre></td></tr></table></figure>
+<p>在第<code>006</code>行和第<code>0014</code>行中，你可以看到三个差不多的结构，其中<code>opt_send_without_block</code>是虚拟机的命令，另外两个是这个命令的参数。你可以猜到，第一个结构由函数名和函数的参数等组成，而第二个结构，<code>&lt;callcache&gt;</code>则是我们所说的Inline缓存。</p>
+<h2 id="所以，inline缓存的键和值是什么？"><a href="#所以，inline缓存的键和值是什么？" class="headerlink" title="所以，inline缓存的键和值是什么？"></a>所以，inline缓存的键和值是什么？</h2><p>答案是每个ruby虚拟机的对此实现不尽相同。以MRI为例，缓存有两个键，风别是“全局函数状态(global_method_state)”和“类序列号(class_serial)”。<strong>缓存的值就是我们想要调用的方法</strong>。</p>
+<h3 id="全局函数状态"><a href="#全局函数状态" class="headerlink" title="全局函数状态"></a>全局函数状态</h3><p>全局函数状态就是一个<strong>全局的</strong>序列号，每次某些类被改变时，这个序列号就+1（比如说monkey patching）。你可以通过<code>RubyVM.stat</code>看到全局函数状态的值，比如说</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">p RubyVM.stat</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">module</span> <span class="title">Kernel</span></span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">aaron</span></span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">p RubyVM.stat</span><br></pre></td></tr></table></figure>
+<p>如果你运行以上代码，你可以看到类似的结果。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#123;:global_method_state=&gt;132, :global_constant_state=&gt;824, :class_serial=&gt;5664&#125;</span><br><span class="line">&#123;:global_method_state=&gt;133, :global_constant_state=&gt;824, :class_serial=&gt;5664&#125;</span><br></pre></td></tr></table></figure>
+<p>给Kernel加一个函数会使全局函数状态数值改变。这并不是一个好的做法，因为它把所有的inline缓存都清空了。</p>
+<h1 id="类序列号-class-serial"><a href="#类序列号-class-serial" class="headerlink" title="类序列号(class_serial)"></a>类序列号(class_serial)</h1><p> 另一种inline缓存键叫做类序列号(class serial number)。每个Ruby类都有一个序列号。我们可以再次调用<code>RubyVM.stat</code>来查看类序列号的变化</p>
+ <figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"> p RubyVM.stat</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span></span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">p RubyVM.stat</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span></span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">p RubyVM.stat</span><br></pre></td></tr></table></figure>
+<p>如果你运行以上代码，你会得到如下结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;:global_method_state=&gt;132, :global_constant_state=&gt;824, :class_serial=&gt;5664&#125;</span><br><span class="line">&#123;:global_method_state=&gt;132, :global_constant_state=&gt;825, :class_serial=&gt;5666&#125;</span><br><span class="line">&#123;:global_method_state=&gt;132, :global_constant_state=&gt;826, :class_serial=&gt;5668&#125;</span><br></pre></td></tr></table></figure>
+<p>你会发现类序列号一直在增长。其实，每个类都被赋予了一个序列号。只要你对类做了一些事。就会增大序列号。比如说，打开这个类。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">p RubyVM.stat</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span></span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">foo</span>;</span> <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">p RubyVM.stat</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span></span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">bar</span>;</span> <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">p RubyVM.stat</span><br></pre></td></tr></table></figure>
+<p>如果你运行以上代码，你会得到如下结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;:global_method_state=&gt;132, :global_constant_state=&gt;824, :class_serial=&gt;5664&#125;</span><br><span class="line">&#123;:global_method_state=&gt;132, :global_constant_state=&gt;825, :class_serial=&gt;5667&#125;</span><br><span class="line">&#123;:global_method_state=&gt;132, :global_constant_state=&gt;825, :class_serial=&gt;5668&#125;</span><br></pre></td></tr></table></figure></p>
+<p>我们没有办法检查每个类的序列号，但是通过<code>RubyVM.stat</code>可以使我们知道打开类所带来的副作用。所以<strong>不要随意打开一个类</strong>，因为他会使以这个类序列号为键的所有缓存都无效。</p>
+<h2 id="复习"><a href="#复习" class="headerlink" title="复习"></a>复习</h2><p>如果我们有这段代码</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span></span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">baz</span>;</span> <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">foo</span> <span class="title">bar</span></span></span><br><span class="line">  bar.baz</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">foo(A.new)</span><br></pre></td></tr></table></figure>
+<p>那么，在<code>bar.baz</code>这一行便存在inline缓存。这个缓存的键为“全局函数状态“和<code>A</code>的类序列号。缓存的值就是<code>baz</code>函数在<code>A</code>定义的地方。</p>
+<h2 id="函数调用的类型与缓存"><a href="#函数调用的类型与缓存" class="headerlink" title="函数调用的类型与缓存"></a>函数调用的类型与缓存</h2><p>目前为止，我们已经知道inline缓存在那里，它的键与value是什么。但是我们还没讨论缓存的种类与大小等种种问题。<strong>MRI中的cache大小是一</strong>。你没看错，就是一。它只缓存了一个值。这被称作<a href="https://en.wikipedia.org/wiki/Inline_caching#Monomorphic_inline_caching" target="_blank" rel="noopener">“单态缓存”</a>，我们来看看这一个例子：<br><figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span></span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">baz</span>;</span> <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">foo</span> <span class="title">bar</span></span></span><br><span class="line">  bar.baz</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">foo(A.new)</span><br><span class="line">foo(A.new)</span><br></pre></td></tr></table></figure></p>
+<p>当<code>foo</code>第一次被调用的时候，MRI把目前的全局函数状态与缓存一开始的全局缓存状态作比较，同时，把A的类序列号和缓存的类序列号作比较。你可以在<a href="https://github.com/ruby/ruby/blob/7f71cdcf65ebd9354ceb77d46a0ff2a187e6a863/vm_insnhelper.c#L1126" target="_blank" rel="noopener">这里</a>看到源代码。因为当前没有缓存在，就被当作是缓存没有命中，所以Ruby就用本办法，从一步一步的找父类直到找到该函数，并缓存之。你也可以在<a href="https://github.com/ruby/ruby/blob/7f71cdcf65ebd9354ceb77d46a0ff2a187e6a863/vm_insnhelper.c#L1132-L1138" target="_blank" rel="noopener">MRI源代码</a>找到缓存值被保存。当这个方法被调用第二次的时候，缓存命中，我们不用在沿着路径慢慢找了。</p>
+<p>我们来看看这一个例子：<br><figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span></span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">baz</span>;</span> <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span></span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">baz</span>;</span> <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">foo</span> <span class="title">bar</span></span></span><br><span class="line">  bar.baz</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">loop <span class="keyword">do</span></span><br><span class="line">  foo(A.new)</span><br><span class="line">  foo(B.new)</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure></p>
+<p>在这个例子里面，我们<strong>永远</strong>都不会命中inline缓存。我们在调用函数<code>def foo bar</code>中，<code>bar</code>的类型一直在变，而缓存的键一部分就是类序列号。我们可以把这种函数调用叫做<strong>“多态的”</strong>函数调用因为<code>bar</code>的类型一直在变。</p>
+<p>还有一个例子<br><figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">foo</span> <span class="title">bar</span></span></span><br><span class="line">  bar.baz</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">loop <span class="keyword">do</span></span><br><span class="line">  klass = Class.new &#123;</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">baz</span></span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">  &#125;</span><br><span class="line">  foo(klass.new)</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure></p>
+<p>在这个例子中，缓存也<strong>永远不会命中</strong>。因为在这个例子中<code>bar</code>可以是<strong>无限种类型</strong>。我们把这种情况叫做<strong>变态</strong>。</p>
+<h1 id="复习-1"><a href="#复习-1" class="headerlink" title="复习"></a>复习</h1><p>好了，现在我们有三种函数调用。单态的函数调用在函数调用的时候只会看到一种类型，多态的函数调用在函数调用的时候会看到多种类型。至于变态，可以算是多态的一种，因为类型太多了，我们很难用缓存来优化它。</p>
+<p>Ruby的inline缓存只保存一个值，而且在单态函数调用的时候效率最高。而且，MRI的inline缓存只缓存最后遇到的值。这说明如果函数调用是多态的，但是类型变化的不是很快，那么即使会出现类型切换，函数查看的时间也会被平摊。</p>
+<h1 id="检查缓存命中情况"><a href="#检查缓存命中情况" class="headerlink" title="检查缓存命中情况"></a>检查缓存命中情况</h1><p>为了检查cache的恶名中情况，我魔改了下MRI，放在<a href="https://github.com/tenderlove/ruby/tree/IC_trace" target="_blank" rel="noopener">这里</a>。它可以帮助你检查inline缓存的命中情况。<strong>请注意，它会降低Ruby的性能，请不要在生产环境中使用</strong>。</p>
+<p>我们先来看第一个例子，观察下他的缓存命中情况。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span></span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">baz</span>;</span> <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">foo</span> <span class="title">bar</span></span></span><br><span class="line">  bar.baz</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">tp = TracePoint.new(<span class="symbol">:inline_cache_hit</span>, <span class="symbol">:inline_cache_miss</span>) <span class="keyword">do</span> <span class="params">|x|</span></span><br><span class="line">  p x =&gt; x.callcache_id</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">tp.enable</span><br><span class="line">foo(A.new)</span><br><span class="line">foo(A.new)</span><br></pre></td></tr></table></figure>
+<p>如果你运行以上代码，你会得到如下结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;#&lt;TracePoint:inline_cache_miss@x.rb:14&gt;=&gt;[3386, 5666, &quot;Class&quot;]&#125;</span><br><span class="line">&#123;#&lt;TracePoint:inline_cache_miss@x.rb:14&gt;=&gt;[3387, 4052, &quot;Object&quot;]&#125;</span><br><span class="line">&#123;#&lt;TracePoint:inline_cache_miss@x.rb:6&gt;=&gt;[3380, 5667, &quot;A&quot;]&#125;</span><br><span class="line">&#123;#&lt;TracePoint:inline_cache_miss@x.rb:15&gt;=&gt;[3388, 5666, &quot;Class&quot;]&#125;</span><br><span class="line">&#123;#&lt;TracePoint:inline_cache_miss@x.rb:15&gt;=&gt;[3389, 4052, &quot;Object&quot;]&#125;</span><br><span class="line">&#123;#&lt;TracePoint:inline_cache_hit@x.rb:6&gt;=&gt;[3380, 5667, &quot;A&quot;]&#125;</span><br></pre></td></tr></table></figure></p>
+<p>你会看到右边部分是一个由三部分组成的数组：1. 一个独有的函数调用ID 2. 类的序列号 3.类名。你可以看到最后一行是<code>A</code>的缓存命中（和我们期望中的一样）</p>
+<p>还有一个例子：<br><figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span></span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">baz</span>;</span> <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span></span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">baz</span>;</span> <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">foo</span> <span class="title">bar</span></span></span><br><span class="line">  bar.baz</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">tp = TracePoint.new(<span class="symbol">:inline_cache_hit</span>, <span class="symbol">:inline_cache_miss</span>) <span class="keyword">do</span> <span class="params">|x|</span></span><br><span class="line">  p x =&gt; x.callcache_id</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">tp.enable</span><br><span class="line"><span class="number">2</span>.times <span class="keyword">do</span></span><br><span class="line">  foo(A.new)</span><br><span class="line">  foo(B.new)</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure></p>
+<p>如果你运行以上代码，你会得到如下结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#123;#&lt;TracePoint:inline_cache_miss@x.rb:18&gt;=&gt;[3391, 4869, &quot;Fixnum&quot;]&#125;</span><br><span class="line">&#123;#&lt;TracePoint:inline_cache_miss@x.rb:19&gt;=&gt;[3384, 5666, &quot;Class&quot;]&#125;</span><br><span class="line">&#123;#&lt;TracePoint:inline_cache_miss@x.rb:19&gt;=&gt;[3385, 4052, &quot;Object&quot;]&#125;</span><br><span class="line">&#123;#&lt;TracePoint:inline_cache_miss@x.rb:10&gt;=&gt;[3381, 5667, &quot;A&quot;]&#125;</span><br><span class="line">&#123;#&lt;TracePoint:inline_cache_miss@x.rb:20&gt;=&gt;[3386, 5669, &quot;Class&quot;]&#125;</span><br><span class="line">&#123;#&lt;TracePoint:inline_cache_miss@x.rb:20&gt;=&gt;[3387, 4052, &quot;Object&quot;]&#125;</span><br><span class="line">&#123;#&lt;TracePoint:inline_cache_miss@x.rb:10&gt;=&gt;[3381, 5670, &quot;B&quot;]&#125;</span><br><span class="line">&#123;#&lt;TracePoint:inline_cache_hit@x.rb:19&gt;=&gt;[3384, 5666, &quot;Class&quot;]&#125;</span><br><span class="line">&#123;#&lt;TracePoint:inline_cache_hit@x.rb:19&gt;=&gt;[3385, 4052, &quot;Object&quot;]&#125;</span><br><span class="line">&#123;#&lt;TracePoint:inline_cache_miss@x.rb:10&gt;=&gt;[3381, 5667, &quot;A&quot;]&#125;</span><br><span class="line">&#123;#&lt;TracePoint:inline_cache_hit@x.rb:20&gt;=&gt;[3386, 5669, &quot;Class&quot;]&#125;</span><br><span class="line">&#123;#&lt;TracePoint:inline_cache_hit@x.rb:20&gt;=&gt;[3387, 4052, &quot;Object&quot;]&#125;</span><br><span class="line">&#123;#&lt;TracePoint:inline_cache_miss@x.rb:10&gt;=&gt;[3381, 5670, &quot;B&quot;]&#125;</span><br></pre></td></tr></table></figure></p>
+<p>你会看到一些缓存命中，但是没有一个是在<code>foo</code>函数里面的。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="http://wiki.c2.com/?InlineCaching" target="_blank" rel="noopener">http://wiki.c2.com/?InlineCaching</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Inline_caching#Monomorphic_inline_caching" target="_blank" rel="noopener">https://en.wikipedia.org/wiki/Inline_caching#Monomorphic_inline_caching</a></li>
+<li><a href="https://bugs.ruby-lang.org/issues/11768" target="_blank" rel="noopener">https://bugs.ruby-lang.org/issues/11768</a></li>
+<li><a href="https://books.google.com/books/about/Ruby_Under_a_Microscope.html?id=6AcvDwAAQBAJ" target="_blank" rel="noopener">https://books.google.com/books/about/Ruby_Under_a_Microscope.html?id=6AcvDwAAQBAJ</a></li>
+</ul>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2019/03/07/MRI中的inline缓存[翻译]/" data-title="Hexo" data-tsina class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev">
+ <a href="/2019/03/07/只有6行的Sinatra 源码解读/" title>
+  <strong>上一篇：</strong><br>
+  <span>
+  (no title)</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2019/03/07/FZF/" title>
+ <strong>下一篇：</strong><br> 
+ <span>(no title)
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">Contents</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#MRI中的inline缓存"><span class="toc-number">1.</span> <span class="toc-text">MRI中的inline缓存</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#什么是inline缓存"><span class="toc-number">1.1.</span> <span class="toc-text">什么是inline缓存</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#所以，inline缓存的键和值是什么？"><span class="toc-number">1.2.</span> <span class="toc-text">所以，inline缓存的键和值是什么？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#全局函数状态"><span class="toc-number">1.2.1.</span> <span class="toc-text">全局函数状态</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#类序列号-class-serial"><span class="toc-number">2.</span> <span class="toc-text">类序列号(class_serial)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#复习"><span class="toc-number">2.1.</span> <span class="toc-text">复习</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#函数调用的类型与缓存"><span class="toc-number">2.2.</span> <span class="toc-text">函数调用的类型与缓存</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#复习-1"><span class="toc-number">3.</span> <span class="toc-text">复习</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#检查缓存命中情况"><span class="toc-number">4.</span> <span class="toc-text">检查缓存命中情况</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">4.1.</span> <span class="toc-text">参考资料</span></a></li></ol></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
+<aside class="clearfix">
+
+  
+
+
+  
+
+  
+
+  <div class="linkslist">
+  <p class="asidetitle">Links</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://coderq.com" target="_blank" title="一个面向程序员交流分享的新一代社区">码农圈</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://wuchong.me" target="_blank" title="Jark&#39;s Blog">Jark&#39;s Blog</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS</a>
+</div>
+
+  <div class="weiboshow">
+  <p class="asidetitle">Weibo</p>
+    <iframe width="100%" height="119" class="share_self" frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=119&fansRow=2&ptype=1&speed=0&skin=9&isTitle=1&noborder=1&isWeibo=0&isFans=0&uid=&verifier=b3593ceb&dpc=1"></iframe>
+</div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer">
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Hello ,I&#39;m thaiwx. <br>
+			This is my blog,believe it or not.</p>
+	</section>
+	 
+	<div class="social-font">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:865861125@qq.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2019 
+		
+		<a href="/about" target="_blank" title="John Doe">John Doe</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="Back to Top"><img src="/img/scrollup.png"></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

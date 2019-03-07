@@ -1,0 +1,496 @@
+
+ <!DOCTYPE HTML>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+  
+    <title>Hexo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="John Doe">
+    
+
+    
+    <meta name="description" content="Sinatra是一个极简的Web框架，目前代码仅仅17000行，相比而言，rails 5.1光Ruby代码就超过了220000，完全是就是庞然大物。对于初学者我来说，17000行代码要是真的读完，还是比较虚。正好，Sinatra的主要作者之一，rkh重写了Sinatra，并实现了Sinatra的核心逻辑almost-sinatra，仅仅用了6行代码，你没看错，真的只有6行。这6行里面，作者在Rac">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://yoursite.com/2019/03/07/只有6行的Sinatra 源码解读/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Sinatra是一个极简的Web框架，目前代码仅仅17000行，相比而言，rails 5.1光Ruby代码就超过了220000，完全是就是庞然大物。对于初学者我来说，17000行代码要是真的读完，还是比较虚。正好，Sinatra的主要作者之一，rkh重写了Sinatra，并实现了Sinatra的核心逻辑almost-sinatra，仅仅用了6行代码，你没看错，真的只有6行。这6行里面，作者在Rac">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2017-11-22T15:04:33.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hexo">
+<meta name="twitter:description" content="Sinatra是一个极简的Web框架，目前代码仅仅17000行，相比而言，rails 5.1光Ruby代码就超过了220000，完全是就是庞然大物。对于初学者我来说，17000行代码要是真的读完，还是比较虚。正好，Sinatra的主要作者之一，rkh重写了Sinatra，并实现了Sinatra的核心逻辑almost-sinatra，仅仅用了6行代码，你没看错，真的只有6行。这6行里面，作者在Rac">
+
+    
+    <link rel="alternative" href="/atom.xml" title="Hexo" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="Hexo" title="Hexo"></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="Hexo">Hexo</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search">
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</ul></nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2019/03/07/只有6行的Sinatra 源码解读/" title itemprop="url"></a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="John Doe" target="_blank" itemprop="author">John Doe</a>
+		
+  </p><p class="article-time">
+    <time datetime="2019-03-07T02:42:35.127Z" itemprop="datePublished"> Published 2019-03-07</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">Contents</strong>
+		
+			
+		
+		</div>
+		
+		<p><a href="https://github.com/sinatra/sinatra" target="_blank" rel="noopener">Sinatra</a>是一个极简的Web框架，目前代码仅仅17000行，相比而言，<code>rails</code> 5.1光Ruby代码就超过了220000，完全是就是庞然大物。对于初学者我来说，17000行代码要是真的读完，还是比较虚。正好，Sinatra的主要作者之一，<a href="https://github.com/rkh" target="_blank" rel="noopener">rkh</a>重写了<code>Sinatra</code>，并实现了<code>Sinatra</code>的核心逻辑<a href="https://github.com/rkh/almost-sinatra" target="_blank" rel="noopener">almost-sinatra</a>，仅仅用了6行代码，你没看错，<strong>真的只有6行</strong>。这6行里面，作者在<code>Rack</code>里面动了很多手脚，用了很多元编程的技巧，值得学习。</p>
+<p>当然，为了压缩代码，作者做了很多丧心病狂的事情，比如给变量命超短的名字，比如不停的用<code>;</code>来避免换行-_-，但是没关系，我已经把它重重构好加上注释了。原代码如下，重构后的代码我放在<a href="https://github.com/ceclinux/almost_sinatra_refactored" target="_blank" rel="noopener">这里</a></p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">%w.rack tilt backports date INT TERM..map&#123;<span class="params">|l|</span>trap(l)&#123;$r.stop&#125;<span class="keyword">rescue</span> <span class="keyword">require</span> l&#125;;$u=Date;$z=($u.new.year + <span class="number">145</span>).abs;puts <span class="string">"== Almost Sinatra/No Version has taken the stage on #$z for development with backup from Webrick"</span></span><br><span class="line">$n=Sinatra=Module.new&#123;extend Rack;a,D,S,q=Rack::Builder.new,Object.method(<span class="symbol">:define_method</span>),<span class="regexp">/@@ *([^\n]+)\n(((?!@@)[^\n]*\n)*)/m</span></span><br><span class="line"><span class="string">%w[get post put delete]</span>.map&#123;<span class="params">|m|</span>D.(m)&#123;<span class="params">|u,&amp;b|</span>a.map(u)&#123;run-&gt;(e)&#123;[<span class="number">200</span>,&#123;<span class="string">"Content-Type"</span>=&gt;<span class="string">"text/html"</span>&#125;,[a.instance_eval(&amp;b)]]&#125;&#125;&#125;&#125;</span><br><span class="line">Tilt.default_mapping.lazy_map.map&#123;<span class="params">|k,v|</span>D.(k)&#123;<span class="params">|n,*o|</span>$t<span class="params">||</span>=(h=$u._jisx0301(<span class="string">"hash, please"</span>);File.read(caller[<span class="number">0</span>][<span class="regexp">/^[^:]+/</span>]).scan(S)&#123;<span class="params">|a,b|</span>h[a]=b&#125;;h);Kernel.const_get(v[<span class="number">0</span>][<span class="number">0</span>]).new(*o)&#123;n==<span class="string">"<span class="subst">#&#123;n&#125;</span>"</span><span class="string">?n</span><span class="symbol">:</span>$t[n.to_s]&#125;.render(a,o[<span class="number">0</span>].try(<span class="symbol">:[]</span>,<span class="symbol">:locals</span>)<span class="params">||</span>&#123;&#125;)&#125;&#125;</span><br><span class="line"><span class="string">%w[set enable disable configure helpers use register]</span>.map&#123;<span class="params">|m|</span>D.(m)&#123;<span class="params">|*_,&amp;b|</span>b.try <span class="symbol">:[]</span>&#125;&#125;;<span class="keyword">END</span>&#123;Rack::Handler.get(<span class="string">"webrick"</span>).run(a,<span class="symbol">Port:</span>$z)&#123;<span class="params">|s|</span>$r=s&#125;&#125;</span><br><span class="line"><span class="string">%w[params session]</span>.map&#123;<span class="params">|m|</span>D.(m)&#123;q.send m&#125;&#125;;a.use Rack::Session::Cookie;a.use Rack::Lock;D.(<span class="symbol">:before</span>)&#123;<span class="params">|&amp;b|</span>a.use Rack::Config,&amp;b&#125;;before&#123;<span class="params">|e|</span>q=Rack::Request.new e;q.params.dup.map&#123;<span class="params">|k,v|</span>params[k.to_sym]=v&#125;&#125;&#125;</span><br></pre></td></tr></table></figure>
+<p>好的，虽然重构了一下，这些代码的信息量依然巨大，我们一段一段的来看</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">%w.rack tilt backports date INT TERM..map <span class="keyword">do</span> <span class="params">|l|</span></span><br><span class="line">    trap(l)&#123;$r.stop&#125;<span class="keyword">rescue</span> <span class="keyword">require</span> l</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>一开始作者就拼命的想要省代码数，这里作者做了两件事情</p>
+<ul>
+<li>引入<code>rack tilt backports date</code>等库 </li>
+<li>当程序接收到<code>TERM</code>或者<code>INT</code>时，调用<code>$r.stop</code></li>
+</ul>
+<p>那它们是怎么被区分开来的呢？你可以把<code>rescue require l</code>去掉，运行后就会报错</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">almost_sinatra.rb:3:in `trap&apos;: unsupported signal SIGrack (ArgumentError</span><br></pre></td></tr></table></figure>
+<p>所以报错的，都被<code>require</code>了</p>
+<p>至于<code>$r</code>是什么东西？，后面会提到。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$curr_date=Date</span><br><span class="line">$port_num=($curr_date.new.year + <span class="number">145</span>).abs</span><br><span class="line">puts <span class="string">"== Almost Sinatra/No Version has taken the stage on #$port_num for development with backup from Webrick"</span></span><br></pre></td></tr></table></figure>
+<p>这三行非常简单，它打印了一行说明，并设置端口号为当前年 + 145</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$n=Sinatra=Module.new&#123;</span><br><span class="line">    extend Rack</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>继续向下看，有一个很大的代码块。这里新建了一个匿名Module并赋值给了<code>Sinatra</code>和<code>$n</code>，在这个Module中，这里<code>extend Rack</code>即继承Rack中所有的方法到当前对象中，由于当前对象<code>self</code>就是这个Module，所有相当于继承了所有Rack的实例方法到当前所建立的Module的类方法中，<strong>然并软</strong>，<code>Rack</code>模块偏偏没有实例方法，所有去掉这一行也能运行。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">rack_builder = Rack::Builder.new</span><br><span class="line">method_obj = Object.method(<span class="symbol">:define_method</span>)</span><br><span class="line">template_regex = <span class="regexp">/@@ *([^\n]+)\n(((?!@@)[^\n]*\n)*)/m</span></span><br><span class="line">rack_request = <span class="literal">nil</span></span><br></pre></td></tr></table></figure>
+<p>这里面新建了四个变量，第一个<code>Rack::Builder.new</code>，是一个方便构建<code>rack</code>应用的工具，比如说这样，<br><figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">require</span> <span class="string">'rack/lobster'</span></span><br><span class="line">app = Rack::Builder.new <span class="keyword">do</span></span><br><span class="line">    use Rack::CommonLogger</span><br><span class="line">    use Rack::ShowExceptions</span><br><span class="line">    map <span class="string">"/lobster"</span> <span class="keyword">do</span></span><br><span class="line">      use Rack::Lint</span><br><span class="line">      run Rack::Lobster.new</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  run app</span><br></pre></td></tr></table></figure></p>
+<p>像写DSL一样！至于<code>Object.method(:define_method)</code>，是一个<code>Method</code>对象表示的方法，可以在以后使用<code>Method#call</code>方法对它进行调用（这里为了省代码，省略写成<code>.()</code>），也就是是说，我们把<code>define_method</code>这个方法拉出来了（后面我们会反复用到它）。<code>rack_request</code>暂定为空，<code>template_regex</code>这个多行<code>regex</code>接下来也会谈到。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">%w[get post put delete]</span>.map <span class="keyword">do</span> <span class="params">|m|</span></span><br><span class="line">       method_obj.(m) <span class="keyword">do</span> <span class="params">|u,&amp;b|</span></span><br><span class="line">           rack_builder.map(u)&#123;             </span><br><span class="line">               run lambda &#123; <span class="params">|env|</span></span><br><span class="line">                   [</span><br><span class="line">                       <span class="number">200</span>,</span><br><span class="line">                       &#123;<span class="string">"Content-Type"</span>=&gt;<span class="string">"text/html"</span>&#125;,</span><br><span class="line">                       <span class="comment">#instance_eval在一个对象的向下文中执行块</span></span><br><span class="line">                       [rack_builder.instance_eval(&amp;b)]</span><br><span class="line">                   ]</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       <span class="keyword">end</span></span><br><span class="line">   <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>好，我们开始使用<code>method_obj</code>(<code>Object.method(:define_method)</code>),它的使用姿势是<code>Method#call</code>，可以简写成<code>.()</code>，这里<code>method_obj.(m)</code>相当于构建了四个方法，分别是<code>get post put delete</code>，在每个方法中，我利用它传进来的参数和<code>Rack::Builder#map</code>方法建立路由，比如说，<code>get</code>方法就是</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get</span><span class="params">(u, &amp;b)</span></span></span><br><span class="line">    map u <span class="keyword">do</span></span><br><span class="line">        run lambda &#123; <span class="params">|env|</span></span><br><span class="line">                    [</span><br><span class="line">                        <span class="number">200</span>,</span><br><span class="line">                        &#123;<span class="string">"Content-Type"</span>=&gt;<span class="string">"text/html"</span>&#125;,</span><br><span class="line">                        <span class="comment">#instance_eval在一个对象的向下文中执行块</span></span><br><span class="line">                        [rack_builder.instance_eval(&amp;b)]</span><br><span class="line">                    ]</span><br><span class="line">                &#125;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>看看前面<code>Rack::Builder</code>的介绍，是不是很熟悉？至于为何写成了这样，你就需要懂<code>rack</code>，具体<code>rack</code>介绍你可以看<a href="https://ruby-china.org/topics/31592" target="_blank" rel="noopener">这里</a>也可以看源代码。</p>
+<p>继续往下看</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Tilt.default_mapping.lazy_map.map <span class="keyword">do</span> <span class="params">|k,v|</span></span><br><span class="line">       method_obj.(k)&#123;</span><br><span class="line">           <span class="params">|n,*o|</span> </span><br><span class="line"></span><br><span class="line">           $t<span class="params">||</span>=(</span><br><span class="line">               <span class="comment"># https://ruby-doc.org/stdlib-2.3.1/libdoc/date/rdoc/Date.html#method-c-_jisx0301</span></span><br><span class="line">               <span class="comment"># Returns a hash of parsed elements.</span></span><br><span class="line">               h=$curr_date._jisx0301(<span class="string">"hash, please"</span>)</span><br><span class="line">               File.read(caller[<span class="number">0</span>][<span class="regexp">/^[^:]+/</span>]).scan(template_regex)&#123;<span class="params">|a,b|</span>h[a]=b&#125;</span><br><span class="line">               h</span><br><span class="line">           )</span><br><span class="line">           <span class="comment"># n=="#&#123;n&#125;" to test n is a string</span></span><br><span class="line">           Kernel.const_get(v[<span class="number">0</span>][<span class="number">0</span>]).new(*o)&#123;n==<span class="string">"<span class="subst">#&#123;n&#125;</span>"</span><span class="string">?n</span><span class="symbol">:</span>$t[n.to_s]&#125;</span><br><span class="line">           .render(rack_builder,o[<span class="number">0</span>]</span><br><span class="line">           .try(<span class="symbol">:[]</span>,<span class="symbol">:locals</span>)<span class="params">||</span>&#123;&#125;)</span><br><span class="line">       &#125;</span><br><span class="line">   <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>这里用到了一个叫<code>Tilt</code>库，<code>Tilt</code>帮你绑定了不同的模版引擎并封装好，以让人以统一的方式使用它。 简单说，这个方法遍历了所有的<code>Tilt.default_mapping.lazy_map</code>，它的每个<code>v</code>长成这样，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[[[&quot;Tilt::ErubiTemplate&quot;, &quot;tilt/erubi&quot;],</span><br><span class="line"> [&quot;Tilt::ErubisTemplate&quot;, &quot;tilt/erubis&quot;],</span><br><span class="line"> [&quot;Tilt::ERBTemplate&quot;, &quot;tilt/erb&quot;]],</span><br><span class="line">[[&quot;Tilt::ErubiTemplate&quot;, &quot;tilt/erubi&quot;],</span><br><span class="line"> [&quot;Tilt::ErubisTemplate&quot;, &quot;tilt/erubis&quot;],</span><br><span class="line"> [&quot;Tilt::ERBTemplate&quot;, &quot;tilt/erb&quot;]],</span><br><span class="line">[[&quot;Tilt::ErubisTemplate&quot;, &quot;tilt/erubis&quot;]],</span><br><span class="line">[[&quot;Tilt::ErubiTemplate&quot;, &quot;tilt/erubi&quot;]],</span><br><span class="line">[[&quot;Tilt::PandocTemplate&quot;, &quot;tilt/pandoc&quot;],</span><br></pre></td></tr></table></figure>
+<p>他把所有模版引擎的名字作为定义的函数的名字，比如说<code>haml</code>。在这个函数里面，他先读取了我们写的模版文件，把其中的信息保存给了<code>t</code>（对，这个时候<code>template_regex</code>起了作用，他把整个文件切成了<code>String</code>数组），总之，如果存在这样一个模板文件，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">@@ index</span><br><span class="line">%html</span><br><span class="line">  %head</span><br><span class="line">    %title= @title</span><br><span class="line">  %body</span><br><span class="line">    %a&#123;:href =&gt; &apos;/hello?name=World&apos;&#125; Say hello!</span><br><span class="line">    %a&#123;:href =&gt; &apos;/counter&apos;&#125; Show Counter</span><br><span class="line"></span><br><span class="line">@@ hello</span><br><span class="line">Hello &lt;%= name %&gt;!</span><br></pre></td></tr></table></figure>
+<p>最后<code>$t</code>变成了一个哈希，长成了这样，所以当你调用<code>haml :index</code>的时候，实际上<code>:index</code>作为键值帮你找到了相应的模板<code>$t[n.to_s]</code>，然后就被渲染出来啦。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;index&quot;=&gt;</span><br><span class="line">  &quot;%html\n  %head\n    %title= @title\n  %body\n    %a&#123;:href =&gt; &apos;/hello?name=World&apos;&#125; Say hello!\n    %a&#123;:href =&gt; &apos;/counter&apos;&#125; Show Counter\n\n&quot;,</span><br><span class="line"> &quot;hello&quot;=&gt;&quot;Hello &lt;%= name %&gt;!\n&quot;&#125;</span><br></pre></td></tr></table></figure>
+<p>然后使用<code>Kernel.const_get(v[0][0])</code>（对于<code>haml</code>实际上就是<code>Tilt::HamlTemplate</code>），然后<code>render</code>他，你当然可以传在<code>render</code>的时候传进<code>locals</code>变量（利用<code>try(:[],:locals)||{})</code>都把它引进来了）。</p>
+<p>你会觉得很奇怪，<code>try</code>是哪里来的，这又不是<code>rails</code>? 其实，这是<code>backports</code>从<code>rails</code>里面偷来的<a href="https://github.com/marcandre/backports/blob/5c876824f52ace6733ee00ae188f4a7e0a12ef32/lib/backports/rails/kernel.rb" target="_blank" rel="noopener">https://github.com/marcandre/backports/blob/5c876824f52ace6733ee00ae188f4a7e0a12ef32/lib/backports/rails/kernel.rb</a>。</p>
+<p>你依然会觉得奇怪，<code>h=$curr_date._jisx0301(&quot;hash, please&quot;)</code>是什么意思？其实这是作者的恶趣味= =|，<code>Date._jisx0301</code>只有传入符合格式的数组才会返回一个非空哈希，像这样</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Date._jisx0301(<span class="string">"H13.02.03"</span>) <span class="comment"># Date._jisx0301("H13.02.03")</span></span><br></pre></td></tr></table></figure>
+<p>不然就是一个空哈希而已</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">%w[set enable disable configure helpers use register]</span>.each <span class="keyword">do</span> <span class="params">|m|</span></span><br><span class="line">        method_obj.(m) <span class="keyword">do</span> <span class="params">|*_,&amp;b|</span> </span><br><span class="line">            b.try <span class="symbol">:[]</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>读到这里，你又发现作者开了个玩笑，他定义了一堆方法，然后当调用这方法时，只是运行方法传入的block而已，也就是说，<br><code>enable :session</code>和<code>disable :session</code>其实都一样……</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">END</span>&#123;Rack::Handler.get(<span class="string">"webrick"</span>).run(rack_builder,<span class="symbol">Port:</span>$port_num)&#123;<span class="params">|s|</span>$r=s&#125;&#125;</span><br></pre></td></tr></table></figure>
+<p><code>END</code>表示该代码块总是最后运行，这里调用了<code>Rack::Handler::WEBrick#run</code>方法，并传入了代码块，然后把<code>WEBrick</code>服务器赋值给前面提到的<code>$r</code>，这样，<code>$r.stop</code>就可以关闭服务器啦。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">@server = <span class="symbol">:</span><span class="symbol">:WEBrick</span><span class="symbol">:</span><span class="symbol">:HTTPServer</span>.new(options)</span><br><span class="line"><span class="keyword">yield</span> @server  <span class="keyword">if</span> block_given?</span><br><span class="line">@server.start</span><br></pre></td></tr></table></figure>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">%w[params session]</span>.map&#123;<span class="params">|m|</span>method_obj.(m)&#123;rack_request.send m&#125;&#125;;</span><br></pre></td></tr></table></figure>
+<p>这一行，所有<code>params</code>和<code>session</code>的调用都被<strong>转发给了</strong><code>Rack::Request#params</code>和<code>Rack::Request#session</code></p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rack_builder.use Rack::Session::Cookie</span><br><span class="line">rack_builder.use Rack::Lock</span><br></pre></td></tr></table></figure>
+<p>这里<code>rack_builder</code>使用了两个中间件，其中<code>Rack::Lock</code>使用<code>mutex</code>控制了每个请求，保证了每个请求是<strong>同步的</strong>。而<code>Rack::Session::Cookie</code>保证服务器客户端上简单的<code>cookie-session</code>控制。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">method_obj.(<span class="symbol">:before</span>)&#123;<span class="params">|&amp;b|</span>rack_builder.use Rack::Config,&amp;b&#125;</span><br><span class="line">before <span class="keyword">do</span> <span class="params">|e|</span></span><br><span class="line">    rack_request=Rack::Request.new e</span><br><span class="line">    rack_request.params.dup.map&#123;<span class="params">|k,v|</span>params[k.to_sym]=v&#125;</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>最后这几行代码中，先是定义了<code>before</code>方法，并把传入的块当作了<code>rack_builder.use</code>的参数。然后调用了<code>before</code>，将<code>rack_request</code>中<code>params</code>的<code>key</code>都转化成<code>symbol</code>。至于<code>rack_builder.use</code>和<code>Rack::Config</code>是什么鬼，代码都很简单，看一眼便知<br><figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">use</span><span class="params">(middleware, *args, &amp;block)</span></span></span><br><span class="line">    <span class="keyword">if</span> @map</span><br><span class="line">      mapping, @map = @map, <span class="literal">nil</span></span><br><span class="line">      @use &lt;&lt; proc &#123; <span class="params">|app|</span> generate_map app, mapping &#125;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    @use &lt;&lt; proc &#123; <span class="params">|app|</span> middleware.new(app, *args, &amp;block) &#125;</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">class</span> <span class="title">Config</span></span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(app, &amp;block)</span></span></span><br><span class="line">    @app = app</span><br><span class="line">    @block = block</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(env)</span></span></span><br><span class="line">    @block.call(env)</span><br><span class="line">    @app.call(env)</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure></p>
+<p>你现在看看<code>Sinatra</code>应用的例子<a href="https://github.com/rkh/almost-sinatra/blob/master/example.rb" target="_blank" rel="noopener">https://github.com/rkh/almost-sinatra/blob/master/example.rb</a>，是不是像开启写轮眼一样，里面的封装黑盒已经一清二楚了呢？^_^</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2019/03/07/只有6行的Sinatra 源码解读/" data-title="Hexo" data-tsina class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev">
+ <a href="/2019/03/07/index/" title>
+  <strong>上一篇：</strong><br>
+  <span>
+  (no title)</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2019/03/07/MRI中的inline缓存[翻译]/" title>
+ <strong>下一篇：</strong><br> 
+ <span>(no title)
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">Contents</strong>
+ 
+ 
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
+<aside class="clearfix">
+
+  
+
+
+  
+
+  
+
+  <div class="linkslist">
+  <p class="asidetitle">Links</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://coderq.com" target="_blank" title="一个面向程序员交流分享的新一代社区">码农圈</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://wuchong.me" target="_blank" title="Jark&#39;s Blog">Jark&#39;s Blog</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS</a>
+</div>
+
+  <div class="weiboshow">
+  <p class="asidetitle">Weibo</p>
+    <iframe width="100%" height="119" class="share_self" frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=119&fansRow=2&ptype=1&speed=0&skin=9&isTitle=1&noborder=1&isWeibo=0&isFans=0&uid=&verifier=b3593ceb&dpc=1"></iframe>
+</div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer">
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Hello ,I&#39;m thaiwx. <br>
+			This is my blog,believe it or not.</p>
+	</section>
+	 
+	<div class="social-font">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:865861125@qq.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2019 
+		
+		<a href="/about" target="_blank" title="John Doe">John Doe</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="Back to Top"><img src="/img/scrollup.png"></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
